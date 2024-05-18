@@ -19,7 +19,9 @@ endif
 BITCOIND_BIN=$(top_builddir)/src/$(BITCOIN_DAEMON_NAME)$(EXEEXT)
 BITCOIN_QT_BIN=$(top_builddir)/src/qt/$(BITCOIN_GUI_NAME)$(EXEEXT)
 BITCOIN_CLI_BIN=$(top_builddir)/src/$(BITCOIN_CLI_NAME)$(EXEEXT)
+BITCOIN_TX_BIN=$(top_builddir)/src/$(BITCOIN_TX_NAME)$(EXEEXT)
 BITCOIN_WIN_INSTALLER=$(PACKAGE)-$(PACKAGE_VERSION)-win$(WINDOWS_BITS)-setup$(EXEEXT)
+BITCOIN_LINUX_BUNDLE=$(PACKAGE)-$(PACKAGE_VERSION).tar.gz
 
 empty :=
 space := $(empty) $(empty)
@@ -72,11 +74,23 @@ dist-hook:
 
 $(BITCOIN_WIN_INSTALLER): all-recursive
 	$(MKDIR_P) $(top_builddir)/release
-	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(BITCOIND_BIN) $(top_builddir)/release
-	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(BITCOIN_QT_BIN) $(top_builddir)/release
-	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(BITCOIN_CLI_BIN) $(top_builddir)/release
+	$(MKDIR_P) $(top_builddir)/release/$(PACKAGE)-$(PACKAGE_VERSION)
+	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(BITCOIND_BIN) $(top_builddir)/release/$(PACKAGE)-$(PACKAGE_VERSION)
+	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(BITCOIN_QT_BIN) $(top_builddir)/release/$(PACKAGE)-$(PACKAGE_VERSION)
+	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(BITCOIN_CLI_BIN) $(top_builddir)/release/$(PACKAGE)-$(PACKAGE_VERSION)
+	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(BITCOIN_TX_BIN) $(top_builddir)/release/$(PACKAGE)-$(PACKAGE_VERSION)
 	@test -f $(MAKENSIS) && $(MAKENSIS) -V2 $(top_builddir)/share/setup.nsi || \
 	  echo error: could not build $@
+	@echo built $@
+
+$(BITCOIN_LINUX_BUNDLE): all-recursive
+	$(MKDIR_P) $(top_builddir)/release
+	$(MKDIR_P) $(top_builddir)/release/$(PACKAGE)-$(PACKAGE_VERSION)
+	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(BITCOIND_BIN) $(top_builddir)/release/$(PACKAGE)-$(PACKAGE_VERSION)
+	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(BITCOIN_QT_BIN) $(top_builddir)/release/$(PACKAGE)-$(PACKAGE_VERSION)
+	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(BITCOIN_CLI_BIN) $(top_builddir)/release/$(PACKAGE)-$(PACKAGE_VERSION)
+	STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(BITCOIN_TX_BIN) $(top_builddir)/release/$(PACKAGE)-$(PACKAGE_VERSION)
+	tar -czvf $(top_builddir)/release/$(BITCOIN_LINUX_BUNDLE) -C $(top_builddir)/release $(PACKAGE)-$(PACKAGE_VERSION)
 	@echo built $@
 
 $(OSX_APP)/Contents/PkgInfo:
@@ -157,6 +171,9 @@ deploy: $(OSX_DMG)
 endif
 if TARGET_WINDOWS
 deploy: $(BITCOIN_WIN_INSTALLER)
+endif
+if TARGET_LINUX
+deploy: $(BITCOIN_LINUX_BUNDLE)
 endif
 
 $(BITCOIN_QT_BIN): FORCE
@@ -271,12 +288,12 @@ EXTRA_DIST += \
     test/util/data/txcreatesignv1.json \
     test/util/data/txcreatesignv2.hex
 
-CLEANFILES = $(OSX_DMG) $(BITCOIN_WIN_INSTALLER)
+CLEANFILES = $(OSX_DMG)
 
 .INTERMEDIATE: $(COVERAGE_INFO)
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-man
 
 clean-local:
-	rm -rf coverage_percent.txt test_bitcoin.coverage/ total.coverage/ test/tmp/ cache/ $(OSX_APP)
+	rm -rf coverage_percent.txt test_bitcoin.coverage/ total.coverage/ test/tmp/ cache/ $(OSX_APP) $(top_builddir)/release
 	rm -rf test/functional/__pycache__ test/functional/test_framework/__pycache__ test/cache
