@@ -527,8 +527,8 @@ std::string HelpMessage(HelpMessageMode mode)
 
 std::string LicenseInfo()
 {
-    const std::string URL_SOURCE_CODE = "<https://github.com/kevacoin-project/kevacoin>";
-    const std::string URL_WEBSITE = "<https://kevacoin.org>";
+    const std::string URL_SOURCE_CODE = "<https://github.com/kevacoin-team/kevacoin>";
+    const std::string URL_WEBSITE = "<https://kevacointeam.org>";
 
     return CopyrightHolders(strprintf(_("Copyright (C) %i-%i"), 2011, COPYRIGHT_YEAR) + " ") + "\n" +
            "\n" +
