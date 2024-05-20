@@ -16,7 +16,7 @@ osx=true
 SIGNER=
 VERSION=
 commit=false
-url=https://github.com/kevacoin-project/kevacoin
+url=https://github.com/kevacoin-team/kevacoin
 proc=2
 mem=2000
 lxc=true
@@ -181,7 +181,7 @@ then
 fi
 
 # Check for OSX SDK
-if [[ ! -e "gitian-builder/inputs/MacOSX10.11.sdk.tar.gz" && $osx == true ]]
+if [[ ! -e "gitian-builder/inputs/MacOSX10.14.sdk.tar.gz" && $osx == true ]]
 then
     echo "Cannot build for OSX, SDK does not exist. Will build for other OSes"
     osx=false
@@ -229,8 +229,8 @@ echo ${COMMIT}
 if [[ $setup = true ]]
 then
     sudo apt-get install ruby apache2 git apt-cacher-ng python-vm-builder qemu-kvm qemu-utils
-    git clone https://github.com/kevacoin-project/gitian.sigs.ltc.git
-    git clone https://github.com/kevacoin-project/kevacoin-detached-sigs.git
+    git clone https://github.com/kevacoin-team/gitian.sigs.ltc.git
+    git clone https://github.com/kevacoin-team/kevacoin-detached-sigs.git
     git clone https://github.com/devrandom/gitian-builder.git
     pushd ./gitian-builder
     if [[ -n "$USE_LXC" ]]
