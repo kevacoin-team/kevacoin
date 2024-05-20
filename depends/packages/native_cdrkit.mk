@@ -9,8 +9,17 @@ define $(package)_preprocess_cmds
   patch -p1 < $($(package)_patch_dir)/cdrkit-deterministic.patch
 endef
 
+GXX_VERSION := $(shell g++ -dumpversion)
+
+ifneq ($(shell expr $(GXX_VERSION) \>= 10), 0)
+  CFLAGS += -fcommon
+  CXXFLAGS += -fcommon
+endif
+
 define $(package)_config_cmds
-  cmake -DCMAKE_INSTALL_PREFIX=$(build_prefix)
+  cmake -DCMAKE_INSTALL_PREFIX=$(build_prefix) \
+        -DCMAKE_C_FLAGS="$(CFLAGS)" \
+        -DCMAKE_CXX_FLAGS="$(CXXFLAGS)"
 endef
 
 define $(package)_build_cmds
