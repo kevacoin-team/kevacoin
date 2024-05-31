@@ -1,7 +1,7 @@
 Kevacoin Core integration/staging tree
 =====================================
 
-https://kevacoin.org
+https://kevacointeam.org
 
 What is Kevacoin?
 ----------------
@@ -22,11 +22,11 @@ As a decentralized key-value database, it can be used to store data for all kind
 Our major observation for decentralized apps is that data is significantly more important than the application. In fact, that is the case for all kinds of applications. It is common these days to hear that companies rewrite their applications using better technologies, but it is rare for any of them to make big changes to their valuable data.
 
 For more information, as well as an immediately useable, binary version of
-the Kevacoin Core software, see [https://kevacoin.org](https://kevacoin.org).
+the Kevacoin Core software, see [https://kevacointeam.org](https://kevacointeam.org).
 
 Documentation
 --------------
-* [Command line and RPC documentation](https://kevacoin.org/documentation.html)
+* [Command line and RPC documentation](https://kevacointeam.org/documentation.html)
 * [Kevacoin ZeroMQ Event Notification](doc/zmq.md)
 
 
@@ -47,7 +47,7 @@ Development Process
 -------------------
 
 The `master` branch is regularly built and tested, but is not guaranteed to be
-completely stable. [Tags](https://github.com/kevacoin-project/kevacoin/tags) are created
+completely stable. [Tags](https://github.com/kevacoin-team/kevacoin/tags) are created
 regularly to indicate new official, stable release versions of Kevacoin Core.
 
 The contribution workflow is described in [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -92,4 +92,4 @@ Translations are periodically pulled from Transifex and merged into the git repo
 pull from Transifex would automatically overwrite them again.
 
 [gitter-image]: http://img.shields.io/badge/+%20GITTER-JOIN%20CHAT%20%E2%86%92-1DCE73.svg?style=flat-square
-[gitter-url]: https://gitter.im/kevacoin-project/community
+[gitter-url]: https://gitter.im/kevacoin-team/community

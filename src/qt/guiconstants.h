@@ -47,7 +47,7 @@ static const int MAX_URI_LENGTH = 255;
 #define SPINNER_FRAMES 36
 
 #define QAPP_ORG_NAME "Kevacoin"
-#define QAPP_ORG_DOMAIN "kevacoin.org"
+#define QAPP_ORG_DOMAIN "kevacointeam.org"
 #define QAPP_APP_NAME_DEFAULT "Kevacoin-Qt"
 #define QAPP_APP_NAME_TESTNET "Kevacoin-Qt-testnet"
 

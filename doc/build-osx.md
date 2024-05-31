@@ -49,7 +49,7 @@ Build Kevacoin Core
 
 1. Clone the kevacoin source code and cd into `kevacoin`
 
-        git clone https://github.com/kevacoin-project/kevacoin
+        git clone https://github.com/kevacoin-team/kevacoin
         cd kevacoin
 
 2.  Build kevacoin-core:

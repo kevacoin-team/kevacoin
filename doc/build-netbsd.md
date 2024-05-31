@@ -25,7 +25,7 @@ python27
 
 Download the source code:
 ```
-git clone https://github.com/kevacoin-project/kevacoin
+git clone https://github.com/kevacoin-team/kevacoin
 ```
 
 See [dependencies.md](dependencies.md) for a complete overview.
