@@ -72,13 +72,7 @@
 #include "crypto/scrypt.h"
 #endif
 
-#include <experimental/filesystem>
-// #include "stratum/stratum/stratum_server.h"
-#include "nlohmann/json.hpp"
 #include "stratum/main.h"
-
-using json = nlohmann::json;
-using namespace stratum;
 
 bool fFeeEstimatesInitialized = false;
 static const bool DEFAULT_PROXYRANDOMIZE = true;
