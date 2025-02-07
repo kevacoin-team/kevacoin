@@ -105,6 +105,7 @@ namespace BCLog {
         QT          = (1 << 19),
         LEVELDB     = (1 << 20),
         KEVA        = (1 << 21),
+        MINING      = (1 << 22),
         ALL         = ~(uint32_t)0,
     };
 }

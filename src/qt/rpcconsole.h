@@ -15,6 +15,7 @@
 #include <QThread>
 
 class ClientModel;
+class MiningModel;
 class PlatformStyle;
 class RPCTimerInterface;
 
@@ -42,6 +43,7 @@ public:
     }
 
     void setClientModel(ClientModel *model);
+    void setMiningModel(MiningModel *model);
 
     enum MessageClass {
         MC_ERROR,
@@ -55,7 +57,8 @@ public:
         TAB_INFO = 0,
         TAB_CONSOLE = 1,
         TAB_GRAPH = 2,
-        TAB_PEERS = 3
+        TAB_PEERS = 3,
+        TAB_MINING = 4
     };
 
 protected:
@@ -82,6 +85,9 @@ private Q_SLOTS:
     void showOrHideBanTableIfRequired();
     /** clear the selected node */
     void clearSelectedNode();
+    void updateMiners();
+    void updateBlockTemplateStats();
+    // void updateStratumStats();
 
 public Q_SLOTS:
     void clear(bool clearHistory = true);
@@ -134,7 +140,22 @@ private:
         SUBVERSION_COLUMN_WIDTH = 150,
         PING_COLUMN_WIDTH = 80,
         BANSUBNET_COLUMN_WIDTH = 200,
-        BANTIME_COLUMN_WIDTH = 250
+        BANTIME_COLUMN_WIDTH = 250,
+        HOST_COLUMN_WIDTH = 100,
+        PORT_COLUMN_WIDTH = 65,
+        DIFFICULTY_COLUMN_WIDTH = 75,
+        // MINERS_COLUMN_WIDTH = 50,
+        ID_COLUMN_WIDTH = 50,
+        IP_COLUMN_WIDTH = 50,
+        HR_COLUMN_WIDTH = 75,
+        HR_24_COLUMN_WIDTH = 75,
+        ACCEPTED_COLUMN_WIDTH = 100,
+        STALE_COLUMN_WIDTH = 75,
+        REJECTED_COLUMN_WIDTH = 100,
+        BLOCKS_ACCEPTED_COLUMN_WIDTH = 100,
+        BLOCKS_REJECTED_COLUMN_WIDTH = 100,
+        AVERAGE_SHARE_DIFFICULTY_COLUMN_WIDTH = 125,
+        LAST_BEAT_COLUMN_WIDTH = 110
 
     };
 
@@ -151,6 +172,7 @@ private:
     int consoleFontSize;
     QCompleter *autoCompleter;
     QThread thread;
+    MiningModel *mingingModel;
 
     /** Update UI with latest network info from model. */
     void updateNetworkState();

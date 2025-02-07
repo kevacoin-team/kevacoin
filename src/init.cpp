@@ -72,6 +72,14 @@
 #include "crypto/scrypt.h"
 #endif
 
+#include <experimental/filesystem>
+// #include "stratum/stratum/stratum_server.h"
+#include "nlohmann/json.hpp"
+#include "stratum/main.h"
+
+using json = nlohmann::json;
+using namespace stratum;
+
 bool fFeeEstimatesInitialized = false;
 static const bool DEFAULT_PROXYRANDOMIZE = true;
 static const bool DEFAULT_REST_ENABLE = false;
@@ -522,6 +530,11 @@ std::string HelpMessage(HelpMessageMode mode)
         strUsage += HelpMessageOpt("-rpcservertimeout=<n>", strprintf("Timeout during HTTP requests (default: %d)", DEFAULT_HTTP_SERVER_TIMEOUT));
     }
 
+    strUsage += HelpMessageGroup(_("Stratum Options:"));
+    strUsage += HelpMessageOpt("-stratum", _("Enable stratum mining server (default: 0)"));
+    strUsage += HelpMessageOpt("-stratumep=<diff@host:port>", _("Set a stratum endpoint. -stratumep may be defined multiple times."));
+    strUsage += HelpMessageOpt("-stratumaddr=<addr>", _("Set address used for mining block template."));
+
     return strUsage;
 }
 
@@ -739,6 +752,11 @@ bool AppInitServers()
         return false;
     if (!StartHTTPServer())
         return false;
+    if (gArgs.GetBoolArg("-stratum", false)) {
+        std::thread stratumThread(startStratum);
+        stratumThread.detach();
+        // startStratum();
+    }
     return true;
 }
 

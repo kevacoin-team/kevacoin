@@ -8,7 +8,10 @@
 
 #include <qt/rpcconsole.h>
 #include <qt/forms/ui_debugwindow.h>
-
+#include <qt/stratumendpointtablemodel.h>
+#include <qt/stratumminertablemodel.h>
+#include <qt/miningmodel.h>
+#include <stratum/stratum/stratum_server.h>
 #include <qt/bantablemodel.h>
 #include <qt/clientmodel.h>
 #include <qt/platformstyle.h>
@@ -61,6 +64,8 @@ const struct {
     {"misc", ":/icons/tx_inout"},
     {nullptr, nullptr}
 };
+
+extern stratum::StratumServer* g_stratumServer;
 
 namespace {
 
@@ -684,6 +689,8 @@ void RPCConsole::setClientModel(ClientModel *model)
         Q_EMIT stopExecutor();
         thread.wait();
     }
+    MiningModel* _miningModel = new MiningModel(g_stratumServer, this);
+    setMiningModel(_miningModel);
 }
 
 static QString categoryClass(int category)
@@ -1227,4 +1234,149 @@ void RPCConsole::showOrHideBanTableIfRequired()
 void RPCConsole::setTabFocus(enum TabTypes tabType)
 {
     ui->tabWidget->setCurrentIndex(tabType);
+}
+
+void RPCConsole::setMiningModel(MiningModel *_model)
+{
+    this->mingingModel = _model;
+
+    if(_model)
+    {
+        QTableView* endpointsTableView = ui->stratumEndpoints;
+
+        endpointsTableView->verticalHeader()->hide();
+        endpointsTableView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        endpointsTableView->setModel(mingingModel->getStratumEndpointTableModel());
+        endpointsTableView->setAlternatingRowColors(true);
+        endpointsTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+        endpointsTableView->setSelectionMode(QAbstractItemView::ContiguousSelection);
+        endpointsTableView->setColumnWidth(StratumEndpointTableModel::Host, HOST_COLUMN_WIDTH);
+        endpointsTableView->setColumnWidth(StratumEndpointTableModel::Port, PORT_COLUMN_WIDTH);
+        endpointsTableView->setColumnWidth(StratumEndpointTableModel::Difficulty, DIFFICULTY_COLUMN_WIDTH);
+        // endpointsTableView->setColumnWidth(StratumEndpointTableModel::Miners, MINERS_COLUMN_WIDTH);
+
+        QTableView* minersTableView = ui->stratumConnectedMiners;
+
+        minersTableView->verticalHeader()->hide();
+        // minersTableView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+        minersTableView->setModel(mingingModel->getStratumMinerTableModel());
+        minersTableView->setAlternatingRowColors(true);
+        minersTableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+        minersTableView->setSelectionMode(QAbstractItemView::ContiguousSelection);
+        minersTableView->setColumnWidth(StratumMinerTableModel::ID, ID_COLUMN_WIDTH);
+        minersTableView->setColumnWidth(StratumMinerTableModel::HR, HR_COLUMN_WIDTH);
+        minersTableView->setColumnWidth(StratumMinerTableModel::HR_24, HR_24_COLUMN_WIDTH);
+        minersTableView->setColumnWidth(StratumMinerTableModel::Accepted, ACCEPTED_COLUMN_WIDTH);
+        minersTableView->setColumnWidth(StratumMinerTableModel::Stale, STALE_COLUMN_WIDTH);
+        minersTableView->setColumnWidth(StratumMinerTableModel::Rejected, REJECTED_COLUMN_WIDTH);
+        minersTableView->setColumnWidth(StratumMinerTableModel::Blocks_Accepted, BLOCKS_ACCEPTED_COLUMN_WIDTH);
+        minersTableView->setColumnWidth(StratumMinerTableModel::Blocks_Rejected, BLOCKS_REJECTED_COLUMN_WIDTH);
+        minersTableView->setColumnWidth(StratumMinerTableModel::Average_Share_Difficulty, AVERAGE_SHARE_DIFFICULTY_COLUMN_WIDTH);
+        minersTableView->setColumnWidth(StratumMinerTableModel::Last_Beat, LAST_BEAT_COLUMN_WIDTH);
+
+        if (gArgs.GetArg("-stratum", false)) {
+            stratum::StratumServer* sr = mingingModel->getStratumServer();
+            stratum::Config* src = sr->getConfig();
+            
+            std::vector<EndpointEntry> epev;
+            for (auto ep : src->Stratum.listen)
+            {
+                EndpointEntry epe;
+                epe.difficulty = std::to_string(ep.diff);
+                epe.host = ep.host;
+                epe.port = std::to_string(ep.port);
+                epev.push_back(epe);
+            }
+            mingingModel->getStratumEndpointTableModel()->setEndpoint(epev);
+
+            ui->mineToAddress->setText(QString::fromStdString(src->Address));
+
+            QTimer* timerBlockTemplateStats = new QTimer(this);
+            connect(timerBlockTemplateStats, &QTimer::timeout, this, &RPCConsole::updateBlockTemplateStats);
+            timerBlockTemplateStats->start(5000);
+
+            // QTimer* timerStratumStats = new QTimer(this);
+            // connect(timerStratumStats, &QTimer::timeout, this, &RPCConsole::updateStratumStats);
+            // timerStratumStats->start(5000);
+
+            QTimer* timerMinerStats = new QTimer(this);
+            connect(timerMinerStats, &QTimer::timeout, this, &RPCConsole::updateMiners);
+            timerMinerStats->start(5000);
+        }
+    }
+}
+
+void RPCConsole::updateBlockTemplateStats()
+{
+    stratum::StratumServer* sr = mingingModel->getStratumServer();
+    auto t = sr->currentBlockTemplate();
+    if (t != nullptr) {
+        ui->stratumBh->setText(QString::number(t->height));
+        ui->stratumDiff->setText(QString::number(t->difficulty));
+    }
+}
+
+// void RPCConsole::updateStratumStats()
+// {
+//     stratum::StratumServer* sr = mingingModel->getStratumServer();
+//     auto t = sr->currentBlockTemplate();
+//     auto rs = sr->getRoundShares();
+    
+//     // if (t != nullptr && rs != 0) {
+//     //     auto progress = static_cast<double>(rs) / static_cast<double>(t->difficulty);
+//     //     ui->stratumRoundProgress->setText(QString::number(progress));
+//     // }
+// }
+
+void RPCConsole::updateMiners()
+{
+    if(!mingingModel) return;
+
+    std::vector<MinerEntry> mev;
+    auto miners = mingingModel->getMiners();
+    std::chrono::hours window24h(24);
+    ui->miners_online->setText(QString::number(mingingModel->getStratumServer()->getSessionCount()));
+
+    double nhr = 0.0;
+    double nhr24 = 0.0;
+    int sba = 0;
+    int sbr = 0;
+    int cnt = 0;
+    uint64_t ssasd = 0;
+
+    for(auto& vminer : miners.Iter())
+    {
+        auto id = vminer.Key;
+        auto miner = vminer.Val;
+        MinerEntry me;
+        me.id = miner->id;
+        me.accepted = miner->validShares;
+        me.rejected = miner->invalidShares;
+        me.stale = miner->staleShares;
+        me.blocks_accepted = miner->accepts;
+        me.blocks_rejected = miner->rejects;
+        me.ip = miner->ip;
+        me.last_beat = QDateTime::fromMSecsSinceEpoch(miner->getLastBeat());
+        me.hr = miner->hashrate(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::minutes(10)));
+        me.hr_24 = miner->hashrate(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::hours(24)));
+        me.average_share_difficulty = miner->average_share_difficulty();
+        
+        mev.push_back(me);
+
+        nhr += me.hr;
+        nhr24 += me.hr_24;
+
+        sba += me.blocks_accepted;
+        sbr += me.blocks_rejected;
+        ssasd += me.average_share_difficulty;
+        cnt += 1;
+    }
+    mingingModel->getStratumMinerTableModel()->setMiner(mev);
+    ui->stratumHashrate->setText(QString::number(nhr));
+    ui->stratumHashrate24->setText(QString::number(nhr24));
+    ui->stratumBlocksAccepted->setText(QString::number(sba));
+    ui->stratumBlocksRejected->setText(QString::number(sbr));
+    if (cnt > 0) {
+        ui->stratumAverageShareDiff->setText(QString::number(ssasd / cnt));
+    }
 }

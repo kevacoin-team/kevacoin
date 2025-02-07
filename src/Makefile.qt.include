@@ -181,6 +181,8 @@ QT_MOC_CPP = \
   qt/moc_receiverequestdialog.cpp \
   qt/moc_recentrequeststablemodel.cpp \
   qt/moc_kevatablemodel.cpp \
+  qt/moc_stratumendpointtablemodel.cpp \
+  qt/moc_stratumminertablemodel.cpp \
   qt/moc_kevanamespacemodel.cpp \
   qt/moc_kevabookmarksmodel.cpp \
   qt/moc_kevadetaildialog.cpp \
@@ -201,6 +203,7 @@ QT_MOC_CPP = \
   qt/moc_transactiontablemodel.cpp \
   qt/moc_transactionview.cpp \
   qt/moc_kevadialog.cpp \
+  qt/moc_miningmodel.cpp \
   qt/moc_utilitydialog.cpp \
   qt/moc_walletframe.cpp \
   qt/moc_walletmodel.cpp \
@@ -276,7 +279,10 @@ BITCOIN_QT_H = \
   qt/transactiontablemodel.h \
   qt/transactionview.h \
   qt/kevadialog.h \
+  qt/miningmodel.h \
   qt/kevatablemodel.h \
+  qt/stratumendpointtablemodel.h \
+  qt/stratumminertablemodel.h \
   qt/kevanamespacemodel.h \
   qt/kevabookmarksmodel.h \
   qt/kevadetaildialog.h \
@@ -401,7 +407,10 @@ BITCOIN_QT_WALLET_CPP = \
   qt/transactiontablemodel.cpp \
   qt/transactionview.cpp \
   qt/kevadialog.cpp \
+  qt/miningmodel.cpp \
   qt/kevatablemodel.cpp \
+  qt/stratumendpointtablemodel.cpp \
+  qt/stratumminertablemodel.cpp \
   qt/kevanamespacemodel.cpp \
   qt/kevabookmarksmodel.cpp \
   qt/kevadetaildialog.cpp \

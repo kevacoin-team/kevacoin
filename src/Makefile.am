@@ -184,7 +184,18 @@ BITCOIN_CORE_H = \
 
 BITCOIN_CORE_H += \
   keva/main.h \
-  keva/common.h
+  keva/common.h \
+  stratum/main.h \
+  stratum/stratum/rpc.h \
+  stratum/stratum/stratum_server.h \
+  stratum/stratum/blocktemplate.h \
+  stratum/stratum/miner.h \
+  stratum/util/util.h \
+  stratum/stratum/session.h \
+  stratum/stratum/endpoint.h \
+  stratum/stratum/job.h \
+  stratum/stratum/config.h \
+  stratum/stratum/miners_map.h
 
 obj/build.h: FORCE
 	@$(MKDIR_P) $(builddir)/obj
@@ -236,6 +247,15 @@ libbitcoin_server_a_SOURCES = \
   validationinterface.cpp \
   versionbits.cpp \
   keva/main.cpp \
+  stratum/main.cpp \
+  stratum/stratum/rpc.cpp \
+  stratum/stratum/stratum_server.cpp \
+  stratum/stratum/blocktemplate.cpp \
+  stratum/stratum/miner.cpp \
+  stratum/util/util.cpp \
+  stratum/stratum/session.cpp \
+  stratum/stratum/endpoint.cpp \
+  stratum/stratum/job.cpp \
   $(BITCOIN_CORE_H)
 
 if ENABLE_ZMQ
