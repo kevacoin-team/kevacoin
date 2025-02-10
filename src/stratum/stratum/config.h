@@ -17,8 +17,6 @@ struct Config {
     bool BypassShareValidation;
     bool BypassAddressValidation;
     int64_t Timeout;
-
-    // NLOHMANN_DEFINE_TYPE_INTRUSIVE(Config, Stratum, Address, BypassShareValidation, BypassAddressValidation, Timeout);
 };
 
 } // namespace stratum

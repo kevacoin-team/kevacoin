@@ -5,6 +5,7 @@
 #include "job.h"
 #include "stratum_server.h"
 #include "structures.h"
+#include "univalue.h"
 #include <array>
 #include <atomic>
 #include <boost/asio.hpp>
@@ -38,7 +39,7 @@ public:
 private:
     void do_read();
     void handle_line(const std::string& line);
-    bool send_json(const nlohmann::json& j);
+    bool send_json(const UniValue& j);
     void pushJob(std::shared_ptr<Job> job);
 
     std::shared_ptr<boost::asio::ip::tcp::socket> socket_;

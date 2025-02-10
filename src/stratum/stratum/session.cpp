@@ -2,7 +2,7 @@
 #include "session.h"
 #include "stratum/util/util.h"
 #include "structures.h"
-#include <nlohmann/json.hpp>
+#include "univalue.h"
 #include <util.h>
 
 
@@ -96,7 +96,7 @@ void Session::pushMessage(const std::string& method, const JobReplyData reply)
     result.method = method;
     result.params = reply;
 
-    send_json(result);
+    send_json(result.toUniValue());
 }
 
 
@@ -119,15 +119,20 @@ void Session::start(StratumServer* server)
 void Session::handle_line(const std::string& line)
 {
     try {
-        auto json_req = nlohmann::json::parse(line);
-        JSONRpcReq req = json_req.get<JSONRpcReq>();
+        UniValue json_req;
+        // Attempt to parse the JSON string into a UniValue object.
+        if (!json_req.read(line)) {
+            throw std::runtime_error("Failed to parse JSON request");
+        }
+        // Create a JSONRpcReq object from the parsed UniValue.
+        JSONRpcReq req = JSONRpcReq::fromUniValue(json_req);
         bool continue_session = handleMessage(server_, req);
         if (!continue_session) {
-            // Close the connection if necessary
+            // Close the connection if necessary.
             socket_->close();
         }
     } catch (const std::exception& e) {
-        LogPrintf("Malformed request from %s:%s.\n", ip, e.what());
+        LogPrintf("Malformed request from %s: %s.\n", ip, e.what());
         socket_->close();
     }
 }
@@ -165,7 +170,7 @@ bool Session::handleMessage(StratumServer* server, const JSONRpcReq& req)
     if (req.method == "login") {
         LoginParams params;
         try {
-            params = req.params.get<LoginParams>();
+            params = LoginParams::fromUniValue(req.params);
         } catch (const std::exception& e) {
             LogPrintf("Unable to parse params: %s\n", e.what());
             return false;
@@ -175,19 +180,19 @@ bool Session::handleMessage(StratumServer* server, const JSONRpcReq& req)
             JSONRpcResp eresp;
             eresp.id = req.id;
             eresp.version = "2.0";
-            eresp.error = *result.second;
-            send_json(eresp);
+            eresp.error = result.second.get()->toUniValue();
+            send_json(eresp.toUniValue());
             return false; // Drop connection if necessary
         }
         JSONRpcResp resp;
         resp.id = req.id;
         resp.version = "2.0";
-        resp.result = *result.first;
-        send_json(resp);
+        resp.result = result.first.get()->toUniValue();
+        send_json(resp.toUniValue());
     } else if (req.method == "getjob") {
         GetJobParams params;
         try {
-            params = req.params.get<GetJobParams>();
+            params = GetJobParams::fromUniValue(req.params);
         } catch (const std::exception& e) {
             LogPrintf("Unable to parse params: %s\n", e.what());
             return false;
@@ -197,19 +202,19 @@ bool Session::handleMessage(StratumServer* server, const JSONRpcReq& req)
             JSONRpcResp eresp;
             eresp.id = req.id;
             eresp.version = "2.0";
-            eresp.error = *result.second;
-            send_json(eresp);
+            eresp.error = result.second.get()->toUniValue();
+            send_json(eresp.toUniValue());
             return false;
         }
         JSONRpcResp resp;
         resp.id = req.id;
         resp.version = "2.0";
-        resp.result = *result.first;
-        send_json(resp);
+        resp.result = result.first.get()->toUniValue();
+        send_json(resp.toUniValue());
     } else if (req.method == "submit") {
         SubmitParams params;
         try {
-            params = req.params.get<SubmitParams>();
+            params = SubmitParams::fromUniValue(req.params);
         } catch (const std::exception& e) {
             LogPrintf("Unable to parse params: %s\n", e.what());
             return false;
@@ -219,15 +224,15 @@ bool Session::handleMessage(StratumServer* server, const JSONRpcReq& req)
             JSONRpcResp eresp;
             eresp.id = req.id;
             eresp.version = "2.0";
-            eresp.error = *result.second;
-            send_json(eresp);
+            eresp.error = result.second.get()->toUniValue();
+            send_json(eresp.toUniValue());
             // return false;
         } else {
             JSONRpcResp resp;
             resp.id = req.id;
             resp.version = "2.0";
-            resp.result = *result.first;
-            send_json(resp);
+            resp.result = result.first.get()->toUniValue();
+            send_json(resp.toUniValue());
         }
 
     } else if (req.method == "keepalived") {
@@ -235,25 +240,25 @@ bool Session::handleMessage(StratumServer* server, const JSONRpcReq& req)
         JSONRpcResp resp;
         resp.id = req.id;
         resp.version = "2.0";
-        resp.result = status;
-        send_json(resp);
+        resp.result = status.toUniValue();
+        send_json(resp.toUniValue());
     } else {
-        auto errReply = server_->handleUnknownRPC(req);
+        auto errReply = server_->handleUnknownRPC(req.toUniValue());
         JSONRpcResp eresp;
         eresp.id = req.id;
         eresp.version = "2.0";
-        eresp.error = *errReply;
-        send_json(eresp);
+        eresp.error = errReply.get()->toUniValue();
+        send_json(eresp.toUniValue());
         return false;
     }
 
     return true;
 }
 
-bool Session::send_json(const nlohmann::json& j)
+bool Session::send_json(const UniValue& j)
 {
     try {
-        std::string serialized = j.dump() + "\n";
+        std::string serialized = j.write() + "\n";
         boost::asio::write(*socket_, boost::asio::buffer(serialized));
         return true;
     } catch (const std::exception& e) {

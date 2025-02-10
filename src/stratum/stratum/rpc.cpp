@@ -304,68 +304,82 @@ GetBlockTemplateReply RPCClient::GetBlockTemplate(int reserveSize, const std::st
 
     GetBlockTemplateReply reply;
     try {
-        reply.difficulty = nlohmann::json::parse(rpcResp)["difficulty"];
-        reply.height = nlohmann::json::parse(rpcResp)["height"];
-        reply.blocktemplate_blob = nlohmann::json::parse(rpcResp)["blocktemplate_blob"];
-        reply.reserved_offset = nlohmann::json::parse(rpcResp)["reserved_offset"];
-        reply.prev_hash = nlohmann::json::parse(rpcResp)["prev_hash"];
-        reply.seed_hash = nlohmann::json::parse(rpcResp)["seed_hash"];
-        reply.next_seed_hash = nlohmann::json::parse(rpcResp)["next_seed_hash"];
-    } catch (...) {
-        throw std::runtime_error("Failed to parse GetBlockTemplateReply");
+        UniValue jsonVal;
+        if (!jsonVal.read(rpcResp)) {
+            throw std::runtime_error("Failed to parse JSON response");
+        }
+
+        reply.difficulty = jsonVal["difficulty"].get_int64();
+        reply.height = jsonVal["height"].get_int64();
+        reply.blocktemplate_blob = jsonVal["blocktemplate_blob"].get_str();
+        reply.reserved_offset = jsonVal["reserved_offset"].get_int();
+        reply.prev_hash = jsonVal["prev_hash"].get_str();
+        reply.seed_hash = jsonVal["seed_hash"].get_str();
+        reply.next_seed_hash = jsonVal["next_seed_hash"].get_str();
+    } catch (const std::exception &e) {
+        throw std::runtime_error("Failed to parse GetBlockTemplateReply: " + std::string(e.what()));
     }
 
     return reply;
 }
+
 
 std::string RPCClient::GetInfo()
 {
     const std::string command = "get_info";
     auto rpcResp = request(command);
 
-    // RpcGet_Info reply;
-    // try {
-    //     reply.mainnet = nlohmann::json::parse(rpcResp)["mainnet"]; // true,
-    //     reply.testnet = nlohmann::json::parse(rpcResp)["testnet"]; //": false,
-    //     reply.height = nlohmann::json::parse(rpcResp)["height"]; // ": 1215433,
-    //     reply.incoming_connections_count = nlohmann::json::parse(rpcResp)["incoming_connections_count"]; //": 0,
-    //     reply.outgoing_connections_count = nlohmann::json::parse(rpcResp)["outgoing_connections_count"]; //": 8,
-    //     reply.difficulty = nlohmann::json::parse(rpcResp)["difficulty"]; //": 19202467,
-    //     reply.tx_pool_size = nlohmann::json::parse(rpcResp)["tx_pool_size"]; //": 2,
-    //     reply.status = nlohmann::json::parse(rpcResp)["status"]; //": "OK"
-    // } catch (...) {
-    //     throw std::runtime_error("Failed to parse GetInfoReply");
-    // }
+    UniValue j;
+    if (!j.read(rpcResp)) {
+        throw std::runtime_error("Failed to parse GetInfoReply");
+    }
 
-    return rpcResp;
+    GetInfoReply reply = GetInfoReply::fromUniValue(j);
+
+    return reply.toUniValue().write();
+    // return j.write();
 }
 
-nlohmann::json RPCClient::SubmitBlock(const std::string& hash)
+UniValue RPCClient::SubmitBlock(const std::string& hash)
 {
     const std::string command = "submitblock " + hash;
-    auto rpcResp = request(command);
+    std::string rpcResp = request(command);
+    UniValue j;
+    if (!j.read(rpcResp)) {
+        throw std::runtime_error("Failed to parse JSON response for submitblock");
+    }
     // "{\n  \"status\": \"OK\"\n}"
-    return nlohmann::json(rpcResp);
+    return j;
 }
+
 
 JSONRpcResp RPCClient::ValidateAddress(const std::string& addr)
 {
     const std::string command = "validateaddress " + addr;
-    JSONRpcResp rpcResp = nlohmann::json(request(command));
-    return rpcResp;
+    std::string rpcRespStr = request(command);
+    UniValue j;
+    if (!j.read(rpcRespStr)) {
+        throw std::runtime_error("Failed to parse JSON response for validateaddress");
+    }
+    JSONRpcResp resp = JSONRpcResp::fromUniValue(j);
+    return resp;
 }
 
-JSONRpcResp RPCClient::GetBlockHash(int height)
+UniValue RPCClient::GetBlockHash(int height)
 {
-    const std::string command = "getblockhash";
-    JSONRpcResp rpcResp = nlohmann::json(request(command));
-
-    if (!rpcResp.result) {
+    const std::string command = "getblockhash " + std::to_string(height);
+    std::string rpcRespStr = request(command);
+    UniValue j;
+    if (!j.read(rpcRespStr)) {
+        throw std::runtime_error("Failed to parse JSON response for getblockhash");
+    }
+    JSONRpcResp resp = JSONRpcResp::fromUniValue(j);
+    if (resp.result.isNull()) {
         throw std::runtime_error("Failed to get block hash");
     }
-
-    return rpcResp.result;
+    return resp.result;
 }
+
 
 // std::shared_ptr<JSONRpcResp> RPCClient::UpdateInfo() {
 //     try {

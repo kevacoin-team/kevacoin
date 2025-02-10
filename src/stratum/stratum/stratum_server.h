@@ -8,6 +8,7 @@
 #include "rpc.h"
 #include "session.h"
 #include "structures.h"
+#include "univalue.h"
 #include <boost/asio.hpp>
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/thread/locks.hpp>
@@ -35,7 +36,7 @@ public:
     std::pair<std::shared_ptr<JobReply>, std::shared_ptr<ErrorReply>> handleLoginRPC(std::shared_ptr<Session> session, const LoginParams& params);
     std::pair<std::shared_ptr<JobReplyData>, std::shared_ptr<ErrorReply>> handleGetJobRPC(std::shared_ptr<Session> session, const GetJobParams& params);
     std::pair<std::shared_ptr<StatusReply>, std::shared_ptr<ErrorReply>> handleSubmitRPC(std::shared_ptr<Session> session, const SubmitParams& params);
-    std::shared_ptr<ErrorReply> handleUnknownRPC(const nlohmann::json& req);
+    std::shared_ptr<ErrorReply> handleUnknownRPC(const UniValue& req);
 
     void broadcastNewJobs();
     void Listen();

@@ -9,6 +9,7 @@
 #include "session.h"
 #include "stratum/util/util.h"
 #include "structures.h"
+#include "univalue.h"
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/shared_mutex.hpp>
@@ -118,7 +119,7 @@ std::pair<std::shared_ptr<JobReply>, std::shared_ptr<ErrorReply>> StratumServer:
     auto jobReply = std::make_shared<JobReply>();
     auto sessionJob = *session->getJob(t.get());
 
-    jobReply->job = sessionJob;
+    jobReply->job = sessionJob.toUniValue();
     jobReply->status = "OK";
     jobReply->id = id;
 
@@ -228,7 +229,7 @@ std::pair<bool, bool> StratumServer::processShare(std::shared_ptr<Miner> miner, 
     if (block) {
         try {
             auto submitResult = rcli->SubmitBlock(util::bytesToHexString(shareBuff));
-            if (submitResult["status"] == "OK") {
+            if (submitResult["status"].get_str() == "OK") {
                 // Update block stats
                 std::string blockFastHash = util::bytesToHexString(util::reverseBytes(util::FastHash(convertedBlob)));
                 auto now = util::MakeTimestamp();
@@ -243,7 +244,7 @@ std::pair<bool, bool> StratumServer::processShare(std::shared_ptr<Miner> miner, 
                 refreshnow = true;
             } else {
                 miner->rejects++;
-                LogPrintf("Block rejected at height %s: %s / share: %s.\n", t->height, submitResult, hashDiff);
+                LogPrintf("Block rejected at height %s: %s / share: %s.\n", t->height, submitResult.get_str(), hashDiff);
                 return {false, refreshnow};
             }
         } catch (const std::exception& e) {
@@ -354,9 +355,9 @@ std::pair<std::shared_ptr<StatusReply>, std::shared_ptr<ErrorReply>> StratumServ
     return {status, nullptr};
 }
 
-std::shared_ptr<ErrorReply> StratumServer::handleUnknownRPC(const nlohmann::json& req)
+std::shared_ptr<ErrorReply> StratumServer::handleUnknownRPC(const UniValue& req)
 {
-    LogPrintf("Unknown RPC method: %s\n", req.dump());
+    LogPrintf("Unknown RPC method: %s\n", req.write());
     auto error = std::make_shared<ErrorReply>();
     error->code = -1;
     error->message = "Invalid method";

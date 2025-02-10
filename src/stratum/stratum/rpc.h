@@ -4,7 +4,7 @@
 
 #include "config.h"
 #include "structures.h"
-#include <nlohmann/json.hpp>
+#include "univalue.h"
 #include <string>
 
 namespace stratum
@@ -17,9 +17,9 @@ public:
 
     GetBlockTemplateReply GetBlockTemplate(int reserveSize, const std::string& address);
     std::string GetInfo();
-    nlohmann::json SubmitBlock(const std::string& hash);
+    UniValue SubmitBlock(const std::string& hash);
     JSONRpcResp ValidateAddress(const std::string& addr);
-    JSONRpcResp GetBlockHash(int height);
+    UniValue GetBlockHash(int height);
 
     Config* config;
 
