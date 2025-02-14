@@ -746,7 +746,7 @@ bool AppInitServers()
         return false;
     if (!StartHTTPServer())
         return false;
-    if (gArgs.GetBoolArg("-stratum", false)) {
+    if (gArgs.GetBoolArg("-stratum", false) && gArgs.GetBoolArg("-server", false)) {
         std::thread stratumThread(startStratum);
         stratumThread.detach();
         // startStratum();

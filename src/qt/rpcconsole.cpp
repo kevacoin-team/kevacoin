@@ -1274,7 +1274,7 @@ void RPCConsole::setMiningModel(MiningModel *_model)
         minersTableView->setColumnWidth(StratumMinerTableModel::Average_Share_Difficulty, AVERAGE_SHARE_DIFFICULTY_COLUMN_WIDTH);
         minersTableView->setColumnWidth(StratumMinerTableModel::Last_Beat, LAST_BEAT_COLUMN_WIDTH);
 
-        if (gArgs.GetArg("-stratum", false)) {
+        if (gArgs.GetArg("-stratum", false) && gArgs.GetBoolArg("-server", false)) {
             stratum::StratumServer* sr = mingingModel->getStratumServer();
             stratum::Config* src = sr->getConfig();
             
