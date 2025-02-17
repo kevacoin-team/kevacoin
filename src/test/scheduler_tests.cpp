@@ -7,7 +7,9 @@
 
 #include <test/test_bitcoin.h>
 
-#include <boost/bind.hpp>
+// Fixing Boost 1.73 compile errors
+#include <boost/bind/bind.hpp>
+using namespace boost::placeholders;
 #include <boost/thread.hpp>
 #include <boost/test/unit_test.hpp>
 
