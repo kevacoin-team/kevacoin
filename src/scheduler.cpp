@@ -8,7 +8,9 @@
 #include <reverselock.h>
 
 #include <assert.h>
-#include <boost/bind.hpp>
+// Fixing Boost 1.73+ compile errors
+#include <boost/bind/bind.hpp>
+using namespace boost::placeholders;
 #include <utility>
 
 CScheduler::CScheduler() : nThreadsServicingQueue(0), stopRequested(false), stopWhenEmpty(false)
