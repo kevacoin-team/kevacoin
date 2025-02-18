@@ -1681,7 +1681,7 @@ bool AppInitMain()
         while (!fHaveGenesis && !ShutdownRequested()) {
             condvar_GenesisWait.wait_for(lock, std::chrono::milliseconds(500));
         }
-        uiInterface.NotifyBlockTip.disconnect(BlockNotifyGenesisWait);
+        uiInterface.NotifyBlockTip.disconnect(&BlockNotifyGenesisWait);
     }
 
     if (ShutdownRequested()) {
