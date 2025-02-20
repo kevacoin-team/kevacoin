@@ -55,8 +55,8 @@ StratumServer::StratumServer(Config* config)
 
 StratumServer::~StratumServer()
 {
-    for (auto& io_service : endpointIoServices) {
-        io_service->stop();
+    for (auto& io_context : endpointIoServices) {
+        io_context->stop();
     }
 
     for (auto& thread : endpointThreads) {
@@ -473,16 +473,16 @@ void StratumServer::Listen()
 {
     try {
         for (auto& portConfig : config->Stratum.listen) {
-            auto io_service = std::make_shared<boost::asio::io_service>();
-            auto work = std::make_shared<boost::asio::io_service::work>(*io_service);
-            auto endpoint = std::make_shared<Endpoint>(&portConfig, *io_service);
+            auto io_context = std::make_shared<boost::asio::io_context>();
+            auto work_guard = boost::asio::make_work_guard(io_context);
+            auto endpoint = std::make_shared<Endpoint>(&portConfig, *io_context);
 
             endpoint->Listen(this, &portConfig);
 
-            std::thread thread([io_service]() { io_service->run(); });
+            std::thread thread([io_context]() { io_context->run(); });
             
-            endpointIoServices.push_back(io_service);
-            endpointWorks.push_back(work);
+            endpointIoServices.push_back(io_context);
+            endpointWorks.push_back(std::make_shared<decltype(work_guard)>(std::move(work_guard)));
             endpointThreads.emplace_back(std::move(thread));
             endpoints.push_back(endpoint);
         }

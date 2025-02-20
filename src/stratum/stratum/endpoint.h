@@ -13,7 +13,7 @@ namespace stratum
 class Endpoint
 {
 public:
-    Endpoint(Port* config, boost::asio::io_service& io_service);
+    Endpoint(Port* config, boost::asio::io_context& io_context);
     ~Endpoint();
 
     void Listen(StratumServer* server_, Port* cfg);
@@ -23,7 +23,7 @@ private:
 
     Port* config_;
     std::shared_ptr<boost::asio::ip::tcp::acceptor> acceptor;
-    boost::asio::io_service& io_service_;
+    boost::asio::io_context& io_context_;
 };
 
 } // namespace stratum

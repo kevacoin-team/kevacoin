@@ -65,8 +65,8 @@ private:
     std::shared_ptr<BlockTemplate> blockTemplate;
     std::mutex blockTemplateMutex;
     // std::mutex blocksMu;
-    std::vector<std::shared_ptr<boost::asio::io_service>> endpointIoServices;
-    std::vector<std::shared_ptr<boost::asio::io_service::work>> endpointWorks;
+    std::vector<std::shared_ptr<boost::asio::io_context>> endpointIoServices;
+    std::vector<std::shared_ptr<boost::asio::executor_work_guard<boost::asio::system_executor>>> endpointWorks;
     std::vector<std::thread> endpointThreads;
     std::vector<std::shared_ptr<Endpoint>> endpoints;
 

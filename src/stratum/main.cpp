@@ -63,8 +63,8 @@ void startStratum()
         g_stratumServer = new stratum::StratumServer(&cfg);
         g_stratumServer->Listen();
 
-        boost::asio::io_service signal_io;
-        boost::asio::signal_set signals(signal_io, SIGINT, SIGTERM);
+        boost::asio::io_context io_context;
+        boost::asio::signal_set signals(io_context, SIGINT, SIGTERM);
         signals.async_wait([&](const boost::system::error_code &error, int signal_number)
                            {
             if (!error) {
@@ -73,7 +73,7 @@ void startStratum()
             } });
 
         LogPrintf("Stratum services are running.\n");
-        signal_io.run();
+        io_context.run();
         LogPrintf("Stratum shutdown complete.\n");
     }
     catch (const std::exception &e)
