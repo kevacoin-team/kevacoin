@@ -1,6 +1,9 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#ifdef WIN32
+#include <winsock2.h>
+#endif
 #include "cn_utils/cnutils.h"
 #include <boost/multiprecision/cpp_int.hpp>
 #include <cstdint>
