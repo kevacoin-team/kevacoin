@@ -331,6 +331,13 @@ case $host in
      #pkgconfig does more harm than good with MinGW
      use_pkgconfig=no
 
+     # Inject <winsock2.h> into config header for Windows
+     AH_VERBATIM([WINSOCK2_HEADER],
+     [/* Ensure Winsock2 is included early for Windows */
+#ifdef WIN32
+#include <winsock2.h>
+#endif])
+
      TARGET_OS=windows
      AC_CHECK_LIB([mingwthrd],      [main],, AC_MSG_ERROR(lib missing))
      AC_CHECK_LIB([kernel32],      [main],, AC_MSG_ERROR(lib missing))
