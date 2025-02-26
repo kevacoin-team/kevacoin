@@ -22,6 +22,7 @@
 #include <policy/rbf.h>
 #include <primitives/block.h>
 #include <primitives/transaction.h>
+#include <random>
 #include <script/script.h>
 #include <scheduler.h>
 #include <timedata.h>
@@ -2439,7 +2440,10 @@ bool CWallet::SelectCoinsMinConf(const CAmount& nTargetValue, const int nConfMin
     std::vector<CInputCoin> vValue;
     CAmount nTotalLower = 0;
 
-    random_shuffle(vCoins.begin(), vCoins.end(), GetRandInt);
+    // random_shuffle(vCoins.begin(), vCoins.end(), GetRandInt);
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::shuffle(vCoins.begin(), vCoins.end(), gen);
 
     for (const COutput &output : vCoins)
     {
