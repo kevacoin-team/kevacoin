@@ -90,7 +90,7 @@
                       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                     </property>
                     <property name="buddy">
-                      <cstring>namespace</cstring>
+                      <cstring>nameSpace</cstring>
                     </property>
                   </widget>
                 </item>
@@ -351,12 +351,15 @@
     </customwidget>
   </customwidgets>
   <tabstops>
-    <tabstop>reqMessage</tabstop>
-    <tabstop>receiveButton</tabstop>
-    <tabstop>clearButton</tabstop>
-    <tabstop>recentRequestsView</tabstop>
+    <tabstop>nameSpace</tabstop>
+    <tabstop>bookmarkNamespace</tabstop>
+    <tabstop>showContent</tabstop>
+    <tabstop>createNamespace</tabstop>
+    <tabstop>listNamespaces</tabstop>
+    <tabstop>bookmarksButton</tabstop>
     <tabstop>showValueButton</tabstop>
     <tabstop>removeButton</tabstop>
+    <tabstop>addKVButton</tabstop>
   </tabstops>
   <resources>
     <include location="../bitcoin.qrc"/>
